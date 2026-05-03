@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../theme/app_colors.dart';
-import '../widgets/app_drawer.dart';
+import '../widgets/settings_overlay.dart';
 import '../widgets/chat_input_area.dart';
 import '../widgets/message_bubble.dart';
+import '../widgets/top_notification.dart';
 import 'auth_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -27,6 +28,15 @@ class _ChatScreenState extends State<ChatScreen> {
   int _messageCount = 0;
   bool _isLoggedIn = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Precache logo for fast and smooth display
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      precacheImage(const AssetImage('assets/images/logo.png'), context);
+    });
+  }
+
   void _showAuthScreen() async {
     final result = await Navigator.push(
       context,
@@ -37,9 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoggedIn = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Connexion réussie ! Vous pouvez continuer à discuter.')),
-      );
+      TopNotification.show(context, 'Connexion réussie ! Bienvenue.');
     }
   }
 
@@ -98,39 +106,44 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  void _handleLogout() {
+    setState(() {
+      _isLoggedIn = false;
+      _messageCount = 0;
+      _messages.clear();
+      _messages.add(Message(
+        text: "Vous avez été déconnecté. Comment puis-je vous aider ?",
+        isUser: false,
+      ));
+    });
+    TopNotification.show(context, 'Déconnexion réussie');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(isLoggedIn: _isLoggedIn),
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(
-              Icons.menu, 
-              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.bleuMarine, 
-              size: 28,
-            ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+        leading: IconButton(
+          icon: Icon(
+            Icons.menu, 
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.bleuMarine, 
+            size: 28,
           ),
+          onPressed: () {
+            SettingsOverlay.show(
+              context, 
+              _isLoggedIn,
+              _handleLogout,
+              _showAuthScreen,
+            );
+          },
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.local_hospital, color: AppColors.bleuCiel, size: 20.0),
-            const SizedBox(width: 8.0),
-            Text(
-              'NOVA HEALTH',
-              style: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.bleuMarine,
-                fontWeight: FontWeight.w600,
-                fontSize: 16.0,
-              ),
-            ),
-          ],
+        title: Image.asset(
+          'assets/images/logo.png',
+          height: 28,
+          fit: BoxFit.contain,
         ),
         centerTitle: true,
         actions: [

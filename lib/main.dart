@@ -3,8 +3,10 @@ import 'screens/chat_screen.dart';
 import 'theme/app_colors.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+final ValueNotifier<String> localeNotifier = ValueNotifier('FR');
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const NovaHealthChatApp());
 }
 

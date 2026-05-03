@@ -104,123 +104,94 @@ class _ChatInputAreaState extends State<ChatInputArea> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 24.0),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+        color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF4F4F2),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _controller,
+            textInputAction: TextInputAction.send,
+            onSubmitted: (_) => _handleSubmitted(),
+            maxLines: 5,
+            minLines: 1,
+            cursorColor: AppColors.bleuCiel,
+            decoration: InputDecoration(
+              hintText: 'Discutez avec NOVA',
+              hintStyle: TextStyle(
+                color: isDark ? Colors.white54 : Colors.black38,
+                fontSize: 16.0,
+              ),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add, color: AppColors.bleuMarine),
+                iconSize: 24.0,
+                onPressed: () {},
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  color: _isListening ? Colors.red : AppColors.bleuMarine,
+                ),
+                iconSize: 24.0,
+                onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 16),
+              if (widget.isGenerating || _isComposing)
+                GestureDetector(
+                  onTap: widget.isGenerating ? widget.onStopGenerating : _handleSubmitted,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: AppColors.vertTeal,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      widget.isGenerating ? Icons.stop : Icons.arrow_upward,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: AppColors.vertTeal,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.graphic_eq,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+            ],
           ),
         ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _controller,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _handleSubmitted(),
-              decoration: InputDecoration(
-                hintText: 'Ask anything',
-                hintStyle: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                  fontSize: 16.0,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.add, color: AppColors.bleuCiel),
-                      iconSize: 28.0,
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(width: 24.0),
-                    IconButton(
-                      icon: const Icon(Icons.tune, color: AppColors.bleuCiel),
-                      iconSize: 28.0,
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    if (widget.isGenerating) ...[
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: AppColors.turquoise,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.stop,
-                              color: Colors.white,
-                              size: 18.0,
-                            ),
-                            padding: EdgeInsets.zero,
-                            onPressed: widget.onStopGenerating,
-                          ),
-                        ),
-                      ),
-                    ] else if (_isComposing) ...[
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: AppColors.turquoise,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_upward,
-                              color: Colors.white,
-                              size: 18.0,
-                            ),
-                            padding: EdgeInsets.zero,
-                            onPressed: _handleSubmitted,
-                          ),
-                        ),
-                      ),
-                    ] else ...[
-                      IconButton(
-                        icon: Icon(
-                          _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening ? Colors.red : AppColors.bleuMarine,
-                        ),
-                        iconSize: 28.0,
-                        onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
