@@ -33,7 +33,7 @@ class MessageBubble extends StatelessWidget {
               text!,
               style: TextStyle(
                 fontSize: 16.0,
-                color: isUser ? Colors.white : Colors.black87,
+                color: isUser ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                 height: 1.4,
               ),
             ),

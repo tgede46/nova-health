@@ -167,37 +167,10 @@ class _AuthScreenState extends State<AuthScreen> {
           // Top section with Logo/Text
           Expanded(
             child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'NOVA HEALT',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.bleuMarine,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const Text(
-                    'H',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.bleuMarine,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: AppColors.turquoise,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 280, // Adjust width as needed for the layout
+                fit: BoxFit.contain,
               ),
             ),
           ),

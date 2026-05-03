@@ -107,7 +107,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     return Container(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 24.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
         boxShadow: [
           BoxShadow(
@@ -127,10 +127,10 @@ class _ChatInputAreaState extends State<ChatInputArea> {
               controller: _controller,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _handleSubmitted(),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Ask anything',
                 hintStyle: TextStyle(
-                  color: Colors.black54,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                   fontSize: 16.0,
                 ),
                 border: InputBorder.none,

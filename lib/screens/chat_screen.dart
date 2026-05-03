@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_drawer.dart';
 import '../widgets/chat_input_area.dart';
 import '../widgets/message_bubble.dart';
 import 'auth_screen.dart';
@@ -100,24 +101,31 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      drawer: AppDrawer(isLoggedIn: _isLoggedIn),
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.bleuMarine, size: 28),
-          onPressed: () {},
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(
+              Icons.menu, 
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.bleuMarine, 
+              size: 28,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.local_hospital, color: AppColors.bleuCiel, size: 20.0),
-            SizedBox(width: 8.0),
+          children: [
+            const Icon(Icons.local_hospital, color: AppColors.bleuCiel, size: 20.0),
+            const SizedBox(width: 8.0),
             Text(
               'NOVA HEALTH',
               style: TextStyle(
-                color: AppColors.bleuMarine,
+                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.bleuMarine,
                 fontWeight: FontWeight.w600,
                 fontSize: 16.0,
               ),
@@ -126,18 +134,19 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_square, color: AppColors.bleuCiel, size: 24),
-            onPressed: () {
-              setState(() {
-                _messages.clear();
-                _messages.add(Message(
-                  text: "Bonjour ! Je suis NOVA HEALTH. Comment puis-je vous aider aujourd'hui ?",
-                  isUser: false,
-                ));
-              });
-            },
-          ),
+          if (_isLoggedIn)
+            IconButton(
+              icon: const Icon(Icons.edit_square, color: AppColors.bleuCiel, size: 24),
+              onPressed: () {
+                setState(() {
+                  _messages.clear();
+                  _messages.add(Message(
+                    text: "Bonjour ! Je suis NOVA HEALTH. Comment puis-je vous aider aujourd'hui ?",
+                    isUser: false,
+                  ));
+                });
+              },
+            ),
         ],
       ),
       body: Column(
