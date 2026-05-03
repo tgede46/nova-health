@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'models/message.dart';
-import 'theme/app_colors.dart';
-import 'widgets/chat_input_area.dart';
-import 'widgets/message_bubble.dart';
+import '../models/message.dart';
+import '../theme/app_colors.dart';
+import '../widgets/chat_input_area.dart';
+import '../widgets/message_bubble.dart';
+import 'auth_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -22,11 +23,35 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
 
   bool _isGenerating = false;
+  int _messageCount = 0;
+  bool _isLoggedIn = false;
+
+  void _showAuthScreen() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AuthScreen()),
+    );
+    
+    if (result == true) {
+      setState(() {
+        _isLoggedIn = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Connexion réussie ! Vous pouvez continuer à discuter.')),
+      );
+    }
+  }
 
   void _handleSubmitted(String text) {
     if (text.trim().isEmpty) return;
 
+    if (!_isLoggedIn && _messageCount >= 3) {
+      _showAuthScreen();
+      return;
+    }
+
     setState(() {
+      _messageCount++;
       _messages.add(Message(text: text, isUser: true));
       _isGenerating = true;
     });
