@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../theme/app_colors.dart';
 
 class ChatInputArea extends StatefulWidget {
   final Function(String) onSubmitted;
@@ -144,7 +145,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Icons.add, color: AppColors.bleuCiel),
                       iconSize: 28.0,
                       onPressed: () {},
                       padding: EdgeInsets.zero,
@@ -152,7 +153,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                     ),
                     const SizedBox(width: 24.0),
                     IconButton(
-                      icon: const Icon(Icons.tune),
+                      icon: const Icon(Icons.tune, color: AppColors.bleuCiel),
                       iconSize: 28.0,
                       onPressed: () {},
                       padding: EdgeInsets.zero,
@@ -167,7 +168,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                         width: 36,
                         height: 36,
                         decoration: const BoxDecoration(
-                          color: Colors.black,
+                          color: AppColors.turquoise,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -187,7 +188,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                         width: 36,
                         height: 36,
                         decoration: const BoxDecoration(
-                          color: Colors.black,
+                          color: AppColors.turquoise,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -206,7 +207,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                       IconButton(
                         icon: Icon(
                           _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening ? Colors.red : Colors.black87,
+                          color: _isListening ? Colors.red : AppColors.bleuMarine,
                         ),
                         iconSize: 28.0,
                         onPressed: _speechToText.isNotListening ? _startListening : _stopListening,

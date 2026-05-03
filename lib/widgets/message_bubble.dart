@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final String? text;
@@ -23,16 +24,16 @@ class MessageBubble extends StatelessWidget {
             : const EdgeInsets.only(right: 16.0, top: 4.0, bottom: 4.0),
         decoration: isUser
             ? BoxDecoration(
-                color: const Color(0xFFF3F3F3), // Light grey for user bubble
+                color: AppColors.vertTeal, // Teal for user bubble
                 borderRadius: BorderRadius.circular(20),
               )
             : null, // No background for bot
         child: child ??
             Text(
               text!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16.0,
-                color: Colors.black87,
+                color: isUser ? Colors.white : Colors.black87,
                 height: 1.4,
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/message.dart';
+import 'theme/app_colors.dart';
 import 'widgets/chat_input_area.dart';
 import 'widgets/message_bubble.dart';
 
@@ -80,28 +81,28 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black, size: 28),
+          icon: const Icon(Icons.menu, color: AppColors.bleuMarine, size: 28),
           onPressed: () {},
         ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
+            Icon(Icons.local_hospital, color: AppColors.bleuCiel, size: 20.0),
+            SizedBox(width: 8.0),
             Text(
               'NOVA HEALTH',
               style: TextStyle(
-                color: Colors.black,
+                color: AppColors.bleuMarine,
                 fontWeight: FontWeight.w600,
                 fontSize: 16.0,
               ),
             ),
-            SizedBox(width: 4.0),
-            Icon(Icons.chevron_right, color: Colors.black54, size: 20.0),
           ],
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_square, color: Colors.black, size: 24),
+            icon: const Icon(Icons.edit_square, color: AppColors.bleuCiel, size: 24),
             onPressed: () {
               setState(() {
                 _messages.clear();
