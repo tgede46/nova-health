@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../models/message.dart';
 import '../models/chat_request.dart';
-import '../models/chat_response.dart';
 import '../services/api_service.dart';
 import '../services/location_service.dart';
 import '../theme/app_colors.dart';
@@ -90,20 +89,13 @@ class _ChatScreenState extends State<ChatScreen> {
       final response = await _apiService.sendChatMessage(request);
 
       if (mounted && _isGenerating) {
-        setState(() {
-          _messages.add(Message(
-            text: response.reponseTexte.toString(),
-            isUser: false,
-          ));
-          _isGenerating = false;
-        });
-        _scrollToBottom();
+        _addBotMessage(response.reponseTexte);
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _messages.add(Message(
-            text: "Désolé, une erreur est survenue lors de la communication avec NOVA HEALTH.",
+            text: "Désolé, une erreur est survenue : ${e.toString().replaceAll('Exception:', '')}",
             isUser: false,
           ));
           _isGenerating = false;
@@ -139,14 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
       if (mounted && _isGenerating) {
-        setState(() {
-          _messages.add(Message(
-            text: response.reponseTexte.toString(),
-            isUser: false,
-          ));
-          _isGenerating = false;
-        });
-        _scrollToBottom();
+        _addBotMessage(response.reponseTexte);
       }
     } catch (e) {
       if (mounted) {
@@ -160,6 +145,28 @@ class _ChatScreenState extends State<ChatScreen> {
         _scrollToBottom();
       }
     }
+  }
+
+  void _addBotMessage(dynamic reponseTexte) {
+    String resultText = "";
+    if (reponseTexte is List) {
+      resultText = reponseTexte.join("\n");
+    } else {
+      resultText = reponseTexte?.toString() ?? "";
+    }
+
+    if (resultText.trim().isEmpty || resultText == "[]") {
+      resultText = "Désolé, je n'ai pas pu générer d'orientation précise. Pouvez-vous reformuler ?";
+    }
+
+    setState(() {
+      _messages.add(Message(
+        text: resultText,
+        isUser: false,
+      ));
+      _isGenerating = false;
+    });
+    _scrollToBottom();
   }
 
   void _stopGenerating() {
