@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import '../theme/app_colors.dart';
 
 class ChatInputArea extends StatefulWidget {
   final Function(String) onSubmitted;
+  final Function(File) onAudioSubmitted;
   final bool isGenerating;
   final VoidCallback onStopGenerating;
 
   const ChatInputArea({
     super.key, 
     required this.onSubmitted,
+    required this.onAudioSubmitted,
     this.isGenerating = false,
     required this.onStopGenerating,
   });
@@ -21,16 +24,14 @@ class ChatInputArea extends StatefulWidget {
 
 class _ChatInputAreaState extends State<ChatInputArea> {
   final TextEditingController _controller = TextEditingController();
-  final SpeechToText _speechToText = SpeechToText();
+  final AudioRecorder _audioRecorder = AudioRecorder();
   
   bool _isComposing = false;
   bool _isListening = false;
-  bool _isSpeechInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _initSpeech();
     _controller.addListener(_handleTextChanged);
   }
 
@@ -40,52 +41,38 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     });
   }
 
-  Future<void> _initSpeech() async {
-    try {
-      _isSpeechInitialized = await _speechToText.initialize();
-      setState(() {});
-    } catch (e) {
-      print('Speech initialization failed: $e');
-    }
-  }
-
   void _startListening() async {
-    setState(() {
-      _isListening = true;
-    });
-
-    if (_isSpeechInitialized) {
-      // True native speech recognition
-      await _speechToText.listen(onResult: (result) {
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        final directory = await getTemporaryDirectory();
+        final path = '${directory.path}/audio_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        
+        const config = RecordConfig();
+        
+        await _audioRecorder.start(config, path: path);
+        
         setState(() {
-          _controller.text = result.recognizedWords;
-          _controller.selection = TextSelection.fromPosition(
-            TextPosition(offset: _controller.text.length),
-          );
+          _isListening = true;
         });
-      });
-    } else {
-      // Simulation for environments like Windows where native speech might fail
-      Future.delayed(const Duration(seconds: 2), () {
-        if (_isListening && mounted) {
-          setState(() {
-            String simulatedText = "Ceci est une simulation vocale. Bonjour NOVA HEALTH !";
-            _controller.text = simulatedText;
-            _controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: simulatedText.length),
-            );
-          });
-          _stopListening();
-        }
-      });
+      }
+    } catch (e) {
+      print('Recording start failed: $e');
     }
   }
 
   void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {
-      _isListening = false;
-    });
+    try {
+      final path = await _audioRecorder.stop();
+      setState(() {
+        _isListening = false;
+      });
+      
+      if (path != null) {
+        widget.onAudioSubmitted(File(path));
+      }
+    } catch (e) {
+      print('Recording stop failed: $e');
+    }
   }
 
   void _handleSubmitted() {
@@ -155,7 +142,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                   color: _isListening ? Colors.red : AppColors.bleuMarine,
                 ),
                 iconSize: 24.0,
-                onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
+                onPressed: _isListening ? _stopListening : _startListening,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../models/message.dart';
+import '../models/chat_request.dart';
+import '../models/chat_response.dart';
+import '../services/api_service.dart';
+import '../services/location_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/settings_overlay.dart';
 import '../widgets/chat_input_area.dart';
@@ -23,6 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   ];
 
   final ScrollController _scrollController = ScrollController();
+  final ApiService _apiService = ApiService();
 
   bool _isGenerating = false;
   int _messageCount = 0;
@@ -34,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Precache logo for fast and smooth display
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(const AssetImage('assets/images/logo.png'), context);
+      LocationService.checkAndRequestPermissions(context);
     });
   }
 
@@ -51,7 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _handleSubmitted(String text) {
+
+  void _handleSubmitted(String text) async {
     if (text.trim().isEmpty) return;
 
     if (!_isLoggedIn && _messageCount >= 3) {
@@ -67,19 +75,91 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _scrollToBottom();
 
-    // Simulate bot response
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      // Get location (with default values if fails)
+      final position = await LocationService.getCurrentLocation();
+      final double lat = position?.latitude ?? 5.3484; // Default to Abidjan if null
+      final double lon = position?.longitude ?? -4.0305;
+
+      final request = ChatRequest(
+        userMessage: text,
+        userLat: lat,
+        userLon: lon,
+      );
+
+      final response = await _apiService.sendChatMessage(request);
+
       if (mounted && _isGenerating) {
         setState(() {
           _messages.add(Message(
-            text: "Je suis un assistant virtuel NOVA HEALTH. J'ai bien reçu votre message : \"$text\"",
+            text: response.reponseTexte.toString(),
             isUser: false,
           ));
           _isGenerating = false;
         });
         _scrollToBottom();
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _messages.add(Message(
+            text: "Désolé, une erreur est survenue lors de la communication avec NOVA HEALTH.",
+            isUser: false,
+          ));
+          _isGenerating = false;
+        });
+        _scrollToBottom();
+      }
+    }
+  }
+
+  void _handleAudioSubmitted(File audioFile) async {
+    if (!_isLoggedIn && _messageCount >= 3) {
+      _showAuthScreen();
+      return;
+    }
+
+    setState(() {
+      _messageCount++;
+      _messages.add(Message(text: "Audio envoyé...", isUser: true));
+      _isGenerating = true;
     });
+
+    _scrollToBottom();
+
+    try {
+      final position = await LocationService.getCurrentLocation();
+      final double lat = position?.latitude ?? 5.3484;
+      final double lon = position?.longitude ?? -4.0305;
+
+      final response = await _apiService.sendAudioMessage(
+        audioFile: audioFile,
+        lat: lat,
+        lon: lon,
+      );
+
+      if (mounted && _isGenerating) {
+        setState(() {
+          _messages.add(Message(
+            text: response.reponseTexte.toString(),
+            isUser: false,
+          ));
+          _isGenerating = false;
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _messages.add(Message(
+            text: "Désolé, une erreur est survenue lors du traitement de l'audio.",
+            isUser: false,
+          ));
+          _isGenerating = false;
+        });
+        _scrollToBottom();
+      }
+    }
   }
 
   void _stopGenerating() {
@@ -185,6 +265,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           ChatInputArea(
             onSubmitted: _handleSubmitted,
+            onAudioSubmitted: _handleAudioSubmitted,
             isGenerating: _isGenerating,
             onStopGenerating: _stopGenerating,
           ),
