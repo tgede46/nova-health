@@ -9,6 +9,8 @@ import '../widgets/settings_overlay.dart';
 import '../widgets/chat_input_area.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/top_notification.dart';
+import '../widgets/pharmacy_list.dart';
+import '../models/chat_response.dart';
 import 'auth_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -89,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final response = await _apiService.sendChatMessage(request);
 
       if (mounted && _isGenerating) {
-        _addBotMessage(response.reponseTexte);
+        _addBotMessage(response);
       }
     } catch (e) {
       if (mounted) {
@@ -131,7 +133,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
       if (mounted && _isGenerating) {
-        _addBotMessage(response.reponseTexte);
+        _addBotMessage(response);
       }
     } catch (e) {
       if (mounted) {
@@ -147,21 +149,31 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _addBotMessage(dynamic reponseTexte) {
-    String resultText = "";
-    if (reponseTexte is List) {
-      resultText = reponseTexte.join("\n");
-    } else {
-      resultText = reponseTexte?.toString() ?? "";
-    }
+  void _addBotMessage(ChatResponse response) {
+    Widget? richChild;
+    String? resultText;
 
-    if (resultText.trim().isEmpty || resultText == "[]") {
-      resultText = "Désolé, je n'ai pas pu générer d'orientation précise. Pouvez-vous reformuler ?";
+    if (response.intention == 'PHARMACIE' && response.reponseTexte is List<Pharmacy>) {
+      richChild = PharmacyList(
+        pharmacies: response.reponseTexte as List<Pharmacy>,
+        message: response.message,
+      );
+    } else {
+      if (response.reponseTexte is List) {
+        resultText = (response.reponseTexte as List).join("\n");
+      } else {
+        resultText = response.reponseTexte?.toString() ?? "";
+      }
+
+      if (resultText.trim().isEmpty || resultText == "[]") {
+        resultText = "Désolé, je n'ai pas pu générer d'orientation précise. Pouvez-vous reformuler ?";
+      }
     }
 
     setState(() {
       _messages.add(Message(
         text: resultText,
+        richChild: richChild,
         isUser: false,
       ));
       _isGenerating = false;

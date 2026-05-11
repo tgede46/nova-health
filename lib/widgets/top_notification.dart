@@ -75,8 +75,8 @@ class _NotificationWidgetState extends State<_NotificationWidget> with SingleTic
 
     return Positioned(
       top: MediaQuery.of(context).padding.top + 10,
-      left: 16,
-      right: 16,
+      left: 8,
+      right: 12,
       child: Material(
         color: Colors.transparent,
         child: SlideTransition(
