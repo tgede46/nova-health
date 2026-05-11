@@ -16,8 +16,14 @@ class PharmacyCard extends StatelessWidget {
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
-    // Remove spaces and special chars for tel: scheme
-    final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    // Remove spaces and special chars
+    String cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    
+    // Add +228 if no country code is present
+    if (!cleanNumber.startsWith('+')) {
+      cleanNumber = '+228$cleanNumber';
+    }
+    
     final Uri launchUri = Uri(scheme: 'tel', path: cleanNumber);
     if (!await launchUrl(launchUri)) {
       throw Exception('Could not launch $launchUri');
@@ -86,7 +92,7 @@ class PharmacyCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'À ${(pharmacy.distance / 1000).toStringAsFixed(2)} km de vous',
+                          'À ${((pharmacy.distance < 10) ? pharmacy.distance : (pharmacy.distance / 1000)).toStringAsFixed(2)} km de vous',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.vertTeal,
